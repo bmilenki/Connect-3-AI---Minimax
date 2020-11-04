@@ -26,3 +26,6 @@ class Game:
             if self.gameBoard.winner():
                 print("O Wins!")
                 break
+            if self.gameBoard.num_empties() == 0:
+                print("Tie")
+                break
