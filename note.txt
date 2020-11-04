@@ -1,0 +1,88 @@
+import game, random, math
+
+
+class RandomPlayer(game.Player):
+    def choose_action(self, state):
+        possActions = state.actions(self.character)
+        randMove = random.randrange(len(possActions))
+
+        state.execute(possActions[randMove])
+
+
+class MinimaxPlayer(game.Player):
+    def choose_action(self, state):
+        action = self.miniMaxDecision(state)
+
+        state.execute(action)
+
+    def miniMaxDecision(self, state):
+        actionResults = []
+
+        turn = self.character
+        nextTurn = oppositeCharacter(turn)
+
+        possActions = state.actions(turn)
+        for a in possActions:
+            print("Considering Tree: ", a)
+            cloneState = state.clone()
+            successorState = cloneState.execute(a)
+            minVal = self.MinValue(successorState, nextTurn)
+
+            actionResults.append(minVal)
+            print("SucessorState Value: ", minVal)
+
+        bestAction = possActions[actionResults.index(max(actionResults))]
+        print("best action: ", bestAction)
+        return bestAction
+
+    def MaxValue(self, state, turn):
+        # termination conditions
+        if state.winner() == self.character:
+            return 1
+        elif state.winner() == oppositeCharacter(self.character):
+            return -1
+        elif state.num_empties() == 0:
+            return 0
+
+        v = -20
+        nextTurn = oppositeCharacter(turn)
+
+        possActions = state.actions(nextTurn)
+        #print(possActions)
+        for a in possActions:
+            #print(a)
+            cloneState = state.clone()
+            successorState = cloneState.execute(a)
+            #successorState = state.execute(a)
+            #print("Max Sucessor State Value: ", self.MinValue(successorState))
+            v = max(v, self.MinValue(successorState, nextTurn))
+        return v
+
+    def MinValue(self, state, turn):
+        # termination conditions
+        if state.winner() == self.character:
+            return 1
+        elif state.winner() == oppositeCharacter(self.character):
+            return -1
+        elif state.num_empties() == 0:
+            return 0
+
+        v = 20
+        nextTurn = oppositeCharacter(turn)
+
+        possActions = state.actions(nextTurn)
+        #print(possActions)
+        for a in possActions:
+            #print(a)
+            cloneState = state.clone()
+            successorState = cloneState.execute(a)
+            #successorState = state.execute(a)
+            #print("Min Sucessor State Value: ", self.MaxValue(successorState))
+            v = min(v, self.MaxValue(successorState, nextTurn))
+        return v
+
+def oppositeCharacter(character):
+    if character == "X":
+        return "O"
+    elif character == "O":
+        return "X"
